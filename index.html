@@ -15,6 +15,21 @@
             --x-color: #38bdf8;
             --o-color: #f472b6;
             --winner-highlight: rgba(99, 102, 241, 0.3);
+            --glow: 0 0 20px rgba(99, 102, 241, 0.2);
+            --cell-bg: rgba(255, 255, 255, 0.03);
+            --cell-border: rgba(255, 255, 255, 0.05);
+            --cell-hover: rgba(255, 255, 255, 0.08);
+        }
+
+        .light-theme {
+            --bg: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --glow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            --cell-bg: #ffffff;
+            --cell-border: rgba(99, 102, 241, 0.1);
+            --cell-hover: rgba(99, 102, 241, 0.05);
         }
 
         * {
@@ -22,6 +37,7 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
         body {
@@ -39,6 +55,21 @@
             overflow: hidden;
         }
 
+        .light-theme body {
+            background-image: none;
+        }
+
+        .user-name {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--primary);
+            opacity: 0.8;
+            z-index: 10;
+        }
+
         .container {
             text-align: center;
             backdrop-filter: blur(12px);
@@ -46,10 +77,16 @@
             padding: 2.5rem;
             border-radius: 2rem;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), var(--glow);
             max-width: 450px;
             width: 90%;
-            animation: fadeIn 0.8s ease-out;
+            animation: fadeIn 0.8s ease-out, glowPulse 3s infinite ease-in-out;
+            position: relative;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 20px rgba(99, 102, 241, 0.2); }
+            50% { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(168, 85, 247, 0.4); }
         }
 
         @keyframes fadeIn {
@@ -84,8 +121,8 @@
 
         .cell {
             aspect-ratio: 1;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: var(--cell-bg);
+            border: 1px solid var(--cell-border);
             border-radius: 1rem;
             display: flex;
             align-items: center;
@@ -96,12 +133,14 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
 
         .cell:hover:not(.filled) {
-            background: rgba(255, 255, 255, 0.08);
+            background: var(--cell-hover);
             transform: scale(1.02);
-            border-color: rgba(255, 255, 255, 0.2);
+            border-color: var(--primary);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
 
         .cell.filled {
@@ -132,7 +171,13 @@
 
         .controls {
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .main-btns {
+            display: flex;
             gap: 1rem;
         }
 
@@ -159,6 +204,69 @@
             transform: translateY(0);
         }
 
+        .settings-panel {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 1rem;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #334155;
+            transition: .4s;
+            border-radius: 20px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
         /* Responsive */
         @media (max-width: 400px) {
             .container {
@@ -170,10 +278,16 @@
             .cell {
                 font-size: 2rem;
             }
+            .user-name {
+                top: 1rem;
+                left: 1rem;
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="user-name">User</div>
     <div class="container">
         <h1>Tic-Tac-Toe</h1>
         <div class="status" id="status">Player X's Turn</div>
@@ -191,7 +305,26 @@
         </div>
 
         <div class="controls">
-            <button id="restart">Restart Game</button>
+            <div class="main-btns">
+                <button id="restart">Restart Game</button>
+            </div>
+            
+            <div class="settings-panel">
+                <div class="setting-item">
+                    <span>Dark/Light Mode</span>
+                    <label class="switch">
+                        <input type="checkbox" id="theme-toggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <span>AI Mode</span>
+                    <label class="switch">
+                        <input type="checkbox" id="ai-toggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -199,33 +332,46 @@
         const boardElement = document.getElementById('board');
         const statusElement = document.getElementById('status');
         const restartButton = document.getElementById('restart');
+        const themeToggle = document.getElementById('theme-toggle');
+        const aiToggle = document.getElementById('ai-toggle');
         const cells = document.querySelectorAll('.cell');
 
         let currentPlayer = 'X';
         let gameState = ["", "", "", "", "", "", "", "", ""];
         let gameActive = true;
+        let isAiMode = false;
 
         const winningConditions = [
-            [0, 1, 2],
-            [3, 4, 5],
-            [6, 7, 8],
-            [0, 3, 6],
-            [1, 4, 7],
-            [2, 5, 8],
-            [0, 4, 8],
-            [2, 4, 6]
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6]
         ];
+
+        // Theme Toggle Logic
+        themeToggle.addEventListener('change', () => {
+            document.documentElement.classList.toggle('light-theme');
+        });
+
+        // AI Mode Toggle
+        aiToggle.addEventListener('change', (e) => {
+            isAiMode = e.target.checked;
+            handleRestartGame();
+        });
 
         function handleCellClick(clickedCellEvent) {
             const clickedCell = clickedCellEvent.target;
             const clickedCellIndex = parseInt(clickedCell.getAttribute('data-index'));
 
-            if (gameState[clickedCellIndex] !== "" || !gameActive) {
+            if (gameState[clickedCellIndex] !== "" || !gameActive || (isAiMode && currentPlayer === 'O')) {
                 return;
             }
 
             handleCellPlayed(clickedCell, clickedCellIndex);
-            handleResultValidation();
+            if (handleResultValidation()) return;
+
+            if (isAiMode && gameActive) {
+                setTimeout(makeAiMove, 600);
+            }
         }
 
         function handleCellPlayed(clickedCell, clickedCellIndex) {
@@ -243,9 +389,7 @@
                 let a = gameState[winCondition[0]];
                 let b = gameState[winCondition[1]];
                 let c = gameState[winCondition[2]];
-                if (a === '' || b === '' || c === '') {
-                    continue;
-                }
+                if (a === '' || b === '' || c === '') continue;
                 if (a === b && b === c) {
                     roundWon = true;
                     winningCombo = winCondition;
@@ -258,7 +402,7 @@
                 statusElement.style.color = currentPlayer === 'X' ? 'var(--x-color)' : 'var(--o-color)';
                 highlightWinner(winningCombo);
                 gameActive = false;
-                return;
+                return true;
             }
 
             let roundDraw = !gameState.includes("");
@@ -266,10 +410,11 @@
                 statusElement.innerText = "Game Draw!";
                 statusElement.style.color = "var(--text-secondary)";
                 gameActive = false;
-                return;
+                return true;
             }
 
             handlePlayerChange();
+            return false;
         }
 
         function highlightWinner(combo) {
@@ -281,6 +426,65 @@
         function handlePlayerChange() {
             currentPlayer = currentPlayer === "X" ? "O" : "X";
             statusElement.innerText = `Player ${currentPlayer}'s Turn`;
+        }
+
+        // AI Logic (Minimax)
+        function makeAiMove() {
+            const bestMove = getBestMove(gameState, 'O');
+            const clickedCell = document.querySelector(`.cell[data-index="${bestMove.index}"]`);
+            handleCellPlayed(clickedCell, bestMove.index);
+            handleResultValidation();
+        }
+
+        function getBestMove(board, player) {
+            const availSpots = board.map((v, i) => v === "" ? i : null).filter(v => v !== null);
+
+            if (checkWin(board, 'X')) return { score: -10 };
+            if (checkWin(board, 'O')) return { score: 10 };
+            if (availSpots.length === 0) return { score: 0 };
+
+            const moves = [];
+            for (let i = 0; i < availSpots.length; i++) {
+                const move = { index: availSpots[i] };
+                board[availSpots[i]] = player;
+
+                if (player === 'O') {
+                    const result = getBestMove(board, 'X');
+                    move.score = result.score;
+                } else {
+                    const result = getBestMove(board, 'O');
+                    move.score = result.score;
+                }
+
+                board[availSpots[i]] = "";
+                moves.push(move);
+            }
+
+            let bestMove;
+            if (player === 'O') {
+                let bestScore = -10000;
+                for (let i = 0; i < moves.length; i++) {
+                    if (moves[i].score > bestScore) {
+                        bestScore = moves[i].score;
+                        bestMove = i;
+                    }
+                }
+            } else {
+                let bestScore = 10000;
+                for (let i = 0; i < moves.length; i++) {
+                    if (moves[i].score < bestScore) {
+                        bestScore = moves[i].score;
+                        bestMove = i;
+                    }
+                }
+            }
+            return moves[bestMove];
+        }
+
+        function checkWin(board, player) {
+            return winningConditions.some(condition => {
+                return condition.every(index => board[index] === player);
+            });
         }
 
         function handleRestartGame() {
